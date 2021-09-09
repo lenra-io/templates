@@ -34,7 +34,7 @@ jobs:
           push: false
           tags: lenra/node12-devtools:latest
           build-args: |
-            TEMPLATE_IMAGE=node12-template
+            TEMPLATE_IMAGE=lenra/node12-template
       - name: Setup node deps
         run: npm i conventional-changelog-conventionalcommits @semantic-release/exec @semantic-release/git @semantic-release-plus/docker -D
       - name: Release
