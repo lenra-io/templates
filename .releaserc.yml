@@ -15,6 +15,7 @@ plugins:
       publishLatestTag: true
       publishMajorTag: true
       publishMinorTag: true
+  - - "@semantic-release-plus/docker"
     - name: "lenra/node12-devtools"
       publishLatestTag: true
       publishMajorTag: true
