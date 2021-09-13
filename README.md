@@ -2,7 +2,7 @@
 
 This repository is based on the openfaas' templates [repository](https://github.com/openfaas/templates).
 
-**Description**:  This project aims to provide some OpenFaaS templates to work with Lenra applications. An application can be launched using any of the following templates with the condition that the application should have been developed using the same programming language as the template.
+**Description**:  This project aims to provide some OpenFaaS templates to work with Lenra applications. An application can be launched using any of the following templates with the condition that the application has been developed using the same programming language as the template.
 
 | Name   | Language | Version | Link                                                                                 |
 | :----- | :------- | :------ | :----------------------------------------------------------------------------------- |
