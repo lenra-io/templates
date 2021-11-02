@@ -58,7 +58,7 @@ function handleAppResource(req, res) {
     }
 }
 
-//handleUi
+//return ui following context
 function handleUi(req, res) {
     let uiStartTime = process.hrtime.bigint();
     let { context } = req.body;
@@ -68,6 +68,10 @@ function handleUi(req, res) {
         newUi => {
             uiStopTime = process.hrtime.bigint();
             res.status(200).json({ ui: newUi, stats: { ui: Number(uiStopTime - uiStartTime) } });
+        }
+    ).catch(
+        err => {
+            res.status(500).send(err.toString ? err.toString() : err);
         }
     )
 }
@@ -86,14 +90,8 @@ function handleAppAction(req, res) {
         .then(res => {
             listenersStopTime = process.hrtime.bigint();
             newData = res;
-            /*uiStartTime = process.hrtime.bigint();
-            return uiHandler(newData);*/
             res.status(200).json({ data: newData, stats: { listeners: Number(listenersStopTime - listenersStartTime) } })
         })
-        /*.then(newUi => {
-            uiStopTime = process.hrtime.bigint();
-            res.status(200).json({ data: newData, ui: newUi, stats: { listeners: Number(listenersStopTime - listenersStartTime), ui: Number(uiStopTime - uiStartTime) } });
-        })*/
         .catch(err => {
             res.status(500).send(err.toString ? err.toString() : err);
         });
