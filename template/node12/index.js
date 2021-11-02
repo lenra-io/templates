@@ -9,6 +9,7 @@ const express = require('express')
 const app = express()
 const listenersHandler = require('../application/listeners/index');
 const uiHandler = require('../application/ui/index');
+const widgetHandler = require('../application/widgets/index');
 const performance = require('perf_hooks').performance;
 const bodyParser = require('body-parser')
 
@@ -50,16 +51,31 @@ function handleAppResource(req, res) {
     const resources_path = "../application/resources/";
 
     // Checking file extensions according to which ones Flutter can handle
-    if(req.body.resource.match(/.*(\.jpeg|\.jpg|\.png|\.gif|\.webp|\.bmp|\.wbmp)$/)){
-        res.sendFile(req.body.resource, {root: resources_path});
+    if (req.body.resource.match(/.*(\.jpeg|\.jpg|\.png|\.gif|\.webp|\.bmp|\.wbmp)$/)) {
+        res.sendFile(req.body.resource, { root: resources_path });
     } else {
         res.sendStatus(404);
     }
 }
 
+//handleUi
+function handleUi(req, res) {
+    let uiStartTime = process.hrtime.bigint();
+    let { context } = req.body;
+    let possibleFutureRes = uiHandler(context);
+
+    Promise.resolve(possibleFutureRes).then(
+        newUi => {
+            uiStopTime = process.hrtime.bigint();
+            res.status(200).json({ ui: newUi, stats: { ui: Number(uiStopTime - uiStartTime) } });
+        }
+    )
+}
+
+
 function handleAppAction(req, res) {
-    let uiStartTime;
-    let uiStopTime;
+    /*let uiStartTime;
+    let uiStopTime;*/
     let listenersStopTime;
     let newData = {};
     let { action, data, props, event } = req.body;
@@ -70,19 +86,39 @@ function handleAppAction(req, res) {
         .then(res => {
             listenersStopTime = process.hrtime.bigint();
             newData = res;
-            uiStartTime = process.hrtime.bigint();
-            return uiHandler(newData);
+            /*uiStartTime = process.hrtime.bigint();
+            return uiHandler(newData);*/
+            res.status(200).json({ data: newData, stats: { listeners: Number(listenersStopTime - listenersStartTime) } })
         })
-        .then(newUi => {
+        /*.then(newUi => {
             uiStopTime = process.hrtime.bigint();
             res.status(200).json({ data: newData, ui: newUi, stats: { listeners: Number(listenersStopTime - listenersStartTime), ui: Number(uiStopTime - uiStartTime) } });
-        })
+        })*/
         .catch(err => {
             res.status(500).send(err.toString ? err.toString() : err);
         });
 }
 
-app.post('/*', middleware);
+function handleWidget(req, res) {
+    //query was replace by data
+    let { name, data } = req.body;
+    let possibleFutureRes = widgetHandler(name, data);
+
+    Promise.resolve(possibleFutureRes).then(
+        widget_ui => {
+            res.status(200).json({ widget: widget_ui })
+        }
+    ).catch(err => {
+        res.status(500).send(err.toString ? err.toString() : err);
+    })
+}
+
+//call direclty ui
+app.post('/*', handleUi);
+//middleware to catch ressource
+app.post('/listener', middleware);
+//cal widget with data in body
+app.post('/widget', handleWidget);
 
 const port = process.env.http_port || 3000;
 
