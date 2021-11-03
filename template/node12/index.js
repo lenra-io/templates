@@ -7,9 +7,7 @@
 const fs = require('fs');
 const express = require('express')
 const app = express()
-const listenersHandler = require('../application/listeners/index');
 const uiHandler = require('../application/ui/index');
-const widgetHandler = require('../application/widgets/index');
 const performance = require('perf_hooks').performance;
 const bodyParser = require('body-parser')
 
@@ -83,6 +81,11 @@ function handleAppAction(req, res) {
     let listenersStopTime;
     let newData = {};
     let { action, data, props, event } = req.body;
+
+    /*
+        listeners file need to exactly math with action name
+    */
+    let listenersHandler = require('../application/listeners/' + action);
     let listenersStartTime = process.hrtime.bigint();
     let possibleFutureRes = listenersHandler(action, data, props, event);
 
@@ -100,6 +103,11 @@ function handleAppAction(req, res) {
 function handleWidget(req, res) {
     //query was replace by data
     let { name, data } = req.body;
+
+    /*
+        widget file need to exactly math with widget name
+    */
+    let widgetHandler = require('../application/widgets/' + name);
     let possibleFutureRes = widgetHandler(name, data);
 
     Promise.resolve(possibleFutureRes).then(
