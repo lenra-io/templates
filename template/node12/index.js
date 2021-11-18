@@ -13,7 +13,6 @@ let widgetHandlers = {};
 const manifestHandler = require('../application/index');
 
 const performance = require('perf_hooks').performance;
-const { randomUUID } = require('crypto');
 
 const defaultMaxSize = '100kb' // body-parser default
 
@@ -49,7 +48,7 @@ const middleware = async (req, res) => {
     } else if (req.body.widget) {
         handleAppWidget(req, res);
     } else {
-        handleAppRoot(req, res);
+        handleAppManifest(req, res);
     }
 };
 
@@ -64,7 +63,7 @@ function handleAppResource(req, res) {
     }
 }
 
-function handleAppRoot(req, res) {
+function handleAppManifest(req, res) {
 
     let uiStartTime = process.hrtime.bigint();
 
@@ -75,14 +74,15 @@ function handleAppRoot(req, res) {
             let uiStopTime = process.hrtime.bigint();
 
             widgetHandlers = manifest.widgets;
-            listenerHandlers = manifest.listeners;
-            manifest.widgets = Object.keys(widgetHandlers).reduce((acc, widget) => ({...acc, [`${widget}-${randomUUID()}`]: widget}));
-            manifest.listeners = Object.keys(listenerHandlers).reduce((acc, listener) => ({...acc, [`${listener}-${randomUUID()}`]: listener}));
-            widgetHandlers = Object.entries(manifest.widgets).map(([key, value]) => [key, widgetHandlers[value]]);
+            listenerHandlers = manifest.listeners || {};
+            manifest.widgets = Object.keys(widgetHandlers);
+            manifest.listeners = Object.keys(listenerHandlers);
             res.status(200).json({ ui: manifest, stats: { ui: Number(uiStopTime - uiStartTime) } });
         })
         .catch(err => {
-            res.status(500).send(err.toString ? err.toString() : err);
+	    const err_string = err.toString ? err.toString() : err
+	    console.error("handleAppManifest:", err_string);
+            res.status(500).send(err_string);
         });
 }
 
@@ -100,7 +100,9 @@ function handleAppWidget(req, res) {
             res.status(200).json({ ui: newUi, stats: { ui: Number(uiStopTime - uiStartTime) } });
         })
         .catch(err => {
-            res.status(500).send(err.toString ? err.toString() : err);
+	    const err_string = err.toString ? err.toString() : err
+	    console.error('handleAppWidget:', err_string);
+            res.status(500).send(err_string);
         });
 }
 
@@ -132,35 +134,14 @@ function handleAppAction(req, res) {
             res.status(200).json({ data: newData, stats: { listeners: Number(listenersStopTime - listenersStartTime) } });
         })
         .catch(err => {
-            res.status(500).send(err.toString ? err.toString() : err);
+	    const err_string = err.toString ? err.toString() : err
+	    console.error('handleAppAction:', err_string);
+            res.status(500).send(err_string);
         });
 }
 
-function handleWidget(req, res) {
-    //query was replace by data
-    let { name, data } = req.body;
-
-    /*
-        widget file need to exactly math with widget name
-    */
-    let widgetHandler = require('../application/widgets/' + name);
-    let possibleFutureRes = widgetHandler(name, data);
-
-    Promise.resolve(possibleFutureRes).then(
-        widget_ui => {
-            res.status(200).json({ widget: widget_ui })
-        }
-    ).catch(err => {
-        res.status(500).send(err.toString ? err.toString() : err);
-    })
-}
-
-//call direclty ui
-app.post('/*', handleUi);
 //middleware to catch ressource
-app.post('/listener', middleware);
-//cal widget with data in body
-app.post('/widget', handleWidget);
+app.post('/', middleware);
 
 const port = process.env.http_port || 3000;
 
