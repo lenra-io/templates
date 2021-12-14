@@ -2,7 +2,7 @@
 
 set -xe # Show output on the logs
 
-read -r -a DOCKER_IMAGE <<< "${DOCKER_IMAGE}"
+read -r -a DOCKER_IMAGE <<< "${DOCKER_IMAGE}" # Convert DOCKER_IMAGE string to array of string
 
 version="$1" # Get version tag
 version="${version#v}" # remove the first `v` char
