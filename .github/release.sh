@@ -2,6 +2,8 @@
 
 set -xe # Show output on the logs
 
+read -r -a DOCKER_IMAGE <<< "${DOCKER_IMAGE}"
+
 version="$1" # Get version tag
 version="${version#v}" # remove the first `v` char
 
