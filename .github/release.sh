@@ -5,6 +5,8 @@ set -xe # Show output on the logs
 version="$1" # Get version tag
 version="${version#v}" # remove the first `v` char
 
+read -r -a DOCKER_IMAGE <<< "${DOCKER_IMAGE}" # Convert string into array of string
+
 tag=("--tag ${DOCKER_IMAGE[0]}:$version" "--tag ${DOCKER_IMAGE[1]}:$version")
 if [[ "$version" != *"-beta."* ]]; then # If the version is a prerelease then don't publish on the short version code
   tag[0]="${tag[0]} --tag ${DOCKER_IMAGE[0]}:${version%%.*} --tag ${DOCKER_IMAGE[0]}:latest" # Remove all after the first dot (dot included)
