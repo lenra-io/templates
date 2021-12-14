@@ -36,5 +36,5 @@ jobs:
       - name: Release
         env:
           GTHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          DOCKER_IMAGE: ("lenra/template-node12" "lenra/devtools-node12")
+          DOCKER_IMAGE: lenra/template-node12 lenra/devtools-node12
         run: npx semantic-release
