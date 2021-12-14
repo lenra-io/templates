@@ -2,8 +2,6 @@
 
 set -xe # Show output on the logs
 
-read -r -a DOCKER_IMAGE <<< "${DOCKER_IMAGE}" # Convert DOCKER_IMAGE string to array of string
-
 version="$1" # Get version tag
 version="${version#v}" # remove the first `v` char
 
@@ -15,7 +13,7 @@ fi
 
 # build the docker image
 docker buildx build \
-  --output type=image,push=false \
+  --output type=image,push=true \
   --platform "amd64,arm64,arm" \
   ${tag[0]} \
   --build-arg CI=true \
@@ -24,7 +22,7 @@ docker buildx build \
   template/node12
 
 docker buildx build \
-  --output type=image,push=false \
+  --output type=image,push=true \
   --platform "amd64,arm64,arm" \
   ${tag[1]} \
   --build-arg CI=true \
