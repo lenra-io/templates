@@ -8,8 +8,8 @@ const fs = require('fs');
 const express = require('express')
 const app = express()
 
-let listenerHandlers = {};
-let widgetHandlers = {};
+let listenerHandlers = null;
+let widgetHandlers = null;
 const manifestHandler = require('../application/index');
 
 const performance = require('perf_hooks').performance;
@@ -63,13 +63,13 @@ function handleAppResource(req, res) {
     }
 }
 
-function handleAppManifest(req, res) {
+async function handleAppManifest(req, res) {
 
     let uiStartTime = process.hrtime.bigint();
 
     let possibleFutureRes = manifestHandler();
 
-    Promise.resolve(possibleFutureRes)
+    return Promise.resolve(possibleFutureRes)
         .then(manifest => {
             let uiStopTime = process.hrtime.bigint();
 
@@ -86,23 +86,23 @@ function handleAppManifest(req, res) {
         });
 }
 
-function handleAppWidget(req, res) {
+async function handleAppWidget(req, res)  {
 
-    let { widget, data, props } = req.body;
+    let { widget, data, props } = req.body
 
-    let uiStartTime = process.hrtime.bigint();
+    let uiStartTime = process.hrtime.bigint()
 
-    let possibleFutureRes = widgetHandlers[widget](data, props);
+    let possibleFutureRes = widgetHandlers[widget](data, props)
 
-    Promise.resolve(possibleFutureRes)
+    return Promise.resolve(possibleFutureRes)
         .then(newUi => {
             let uiStopTime = process.hrtime.bigint();
             res.status(200).json({ ui: newUi, stats: { ui: Number(uiStopTime - uiStartTime) } });
         })
         .catch(err => {
-	    const err_string = err.toString ? err.toString() : err
-	    console.error('handleAppWidget:', err_string);
-            res.status(500).send(err_string);
+            const err_string = err.toString ? err.toString() : err
+            console.error('handleAppWidget:', err_string)
+            res.status(500).send(err_string)
         });
 }
 
@@ -114,30 +114,34 @@ function handleAppWidget(req, res) {
  * If an event is triggered, the matched event function provided by the app is triggered.
  * The event can be a listener or a widget update.
  */
-function handleAppAction(req, res) {
+ async function handleAppAction(req, res) {
+
     let newData = {};
 
     let { action, data, props, event } = req.body;
 
+    let listenersStartTime = process.hrtime.bigint();
+
     /*
         listeners file need to exactly math with action name
     */
-    let listenersHandler = require('../application/listeners/' + action);
-    let listenersStartTime = process.hrtime.bigint();
+    if (Object.keys(listenerHandlers).includes(action)) {
+        let possibleFutureRes = listenerHandlers[action](action, data, props, event);
 
-    let possibleFutureRes = listenersHandler(action, data, props, event);
-
-    Promise.resolve(possibleFutureRes)
-        .then(res => {
-            let listenersStopTime = process.hrtime.bigint();
-            newData = res;
-            res.status(200).json({ data: newData, stats: { listeners: Number(listenersStopTime - listenersStartTime) } });
-        })
-        .catch(err => {
-	    const err_string = err.toString ? err.toString() : err
-	    console.error('handleAppAction:', err_string);
-            res.status(500).send(err_string);
-        });
+        return Promise.resolve(possibleFutureRes)
+            .then(res => {
+                let listenersStopTime = process.hrtime.bigint();
+                newData = res;
+                res.status(200).json({ data: newData, stats: { listeners: Number(listenersStopTime - listenersStartTime) } });
+            })
+            .catch(err => {
+                const err_string = err.toString ? err.toString() : err
+                console.error('handleAppAction:', err_string);
+                res.status(500).send(err_string);
+            });
+    } else {
+        console.error(`No listener found for action ${action} in app manifest.`);
+    }
 }
 
 //middleware to catch ressource
