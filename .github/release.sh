@@ -46,9 +46,9 @@ function get_tag {
 
 VERSION="$1" # Get version tag
 
-read -r -a DOCKER_IMAGES <<< "${DOCKER_IMAGE}" # Convert string into array of string
+read -r -a docker_images <<< "${DOCKER_IMAGE}" # Convert string into array of string
 
-get_tag "$VERSION" "${DOCKER_IMAGES[0]}"
+get_tag "$VERSION" "${docker_images[0]}"
 
 docker buildx build \
   --output type=image,push=true \
@@ -59,7 +59,7 @@ docker buildx build \
   --cache-to type=local,dest=~/.docker-cache/template-node12 \
   template/node12
 
-get_tag "$VERSION" "${DOCKER_IMAGES[1]}"
+get_tag "$VERSION" "${docker_images[1]}"
 
 docker buildx build \
   --output type=image,push=true \
