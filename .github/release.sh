@@ -49,6 +49,10 @@ VERSION="$1" # Get version tag
 read -r -a docker_images <<< "${DOCKER_IMAGE}" # Convert string into array of string
 
 get_tag "$VERSION" "${docker_images[0]}"
+exit_code=$?
+if [[ "$exit_code" != "0" ]]; then
+  exit $exit_code
+fi
 
 docker buildx build \
   --output type=image,push=true \
@@ -60,6 +64,10 @@ docker buildx build \
   template/node12
 
 get_tag "$VERSION" "${docker_images[1]}"
+exit_code=$?
+if [[ "$exit_code" != "0" ]]; then
+  exit $exit_code
+fi
 
 docker buildx build \
   --output type=image,push=true \
