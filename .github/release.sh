@@ -6,12 +6,12 @@ function get_tag {
   version="$1" # Get version tag
   DOCKER_IMAGE="$2"
   
-  regex='v([0-9]+.[0-9]+.[0-9]+)-?([a-z]+)?.?([0-9]+)?'
+  regex='v([0-9]+.[0-9]+.[0-9]+)(-([a-z]+).([0-9]+))?'
   
   if [[ $version =~ $regex ]]; then
     v="${BASH_REMATCH[1]}"
-    channel="${BASH_REMATCH[2]}"
-    channel_version="${BASH_REMATCH[3]}"
+    channel="${BASH_REMATCH[3]}"
+    channel_version="${BASH_REMATCH[4]}"
 
     tag="--tag ${DOCKER_IMAGE}:${version#v}"
 
