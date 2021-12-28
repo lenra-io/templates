@@ -4,7 +4,7 @@ set -xe # Show output on the logs
 
 function get_tag {
   version="$1" # Get version tag
-  DOCKER_IMAGE=$2
+  DOCKER_IMAGE="$2"
   
   regex='v([0-9]+.[0-9]+.[0-9]+)-?([a-z]+)?.?([0-9]+)?'
   
