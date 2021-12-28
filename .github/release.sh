@@ -2,7 +2,7 @@
 
 set -xe # Show output on the logs
 
-function get_tags {
+function get_tag {
   version="$1" # Get version tag
   DOCKER_IMAGE=$2
   
