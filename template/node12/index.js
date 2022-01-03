@@ -126,12 +126,12 @@ async function handleAppWidget(req, res)  {
         listeners file need to exactly math with action name
     */
     if (Object.keys(listenerHandlers).includes(action)) {
-        let possibleFutureRes = listenerHandlers[action](action, data, props, event);
+        let possibleFutureRes = listenerHandlers[action](data, props, event);
 
         return Promise.resolve(possibleFutureRes)
-            .then(res => {
+            .then(data => {
                 let listenersStopTime = process.hrtime.bigint();
-                newData = res;
+                newData = data;
                 res.status(200).json({ data: newData, stats: { listeners: Number(listenersStopTime - listenersStartTime) } });
             })
             .catch(err => {
