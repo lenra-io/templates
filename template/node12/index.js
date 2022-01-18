@@ -12,8 +12,6 @@ let listenerHandlers = null;
 let widgetHandlers = null;
 const manifestHandler = require('../application/index');
 
-const performance = require('perf_hooks').performance;
-
 const defaultMaxSize = '100kb' // body-parser default
 
 app.disable('x-powered-by');
@@ -44,7 +42,7 @@ const middleware = async (req, res) => {
     if (req.body.resource) {
         handleAppResource(req, res);
     } else if (req.body.action) {
-        handleAppAction(req, res);
+        handleAppListener(req, res);
     } else if (req.body.widget) {
         handleAppWidget(req, res);
     } else {
@@ -77,32 +75,35 @@ async function handleAppManifest(req, res) {
             listenerHandlers = manifest.listeners || {};
             manifest.widgets = Object.keys(widgetHandlers);
             manifest.listeners = Object.keys(listenerHandlers);
-            res.status(200).json({ ui: manifest, stats: { ui: Number(uiStopTime - uiStartTime) } });
+
+            res.status(200).json({ manifest: manifest, stats: { ui: Number(uiStopTime - uiStartTime) } });
         })
         .catch(err => {
-	    const err_string = err.toString ? err.toString() : err
-	    console.error("handleAppManifest:", err_string);
+            const err_string = err.toString ? err.toString() : err;
+            console.error("handleAppManifest:", err_string);
             res.status(500).send(err_string);
         });
 }
 
-async function handleAppWidget(req, res)  {
+async function handleAppWidget(req, res) {
 
-    let { widget, data, props } = req.body
 
-    let uiStartTime = process.hrtime.bigint()
+    let { widget, data, props } = req.body;
 
-    let possibleFutureRes = widgetHandlers[widget](data, props)
+    let uiStartTime = process.hrtime.bigint();
+
+    let possibleFutureRes = widgetHandlers[widget](data, props);
 
     return Promise.resolve(possibleFutureRes)
-        .then(newUi => {
+        .then(widget => {
             let uiStopTime = process.hrtime.bigint();
-            res.status(200).json({ ui: newUi, stats: { ui: Number(uiStopTime - uiStartTime) } });
+
+            res.status(200).json({ widget: widget, stats: { ui: Number(uiStopTime - uiStartTime) } });
         })
         .catch(err => {
-            const err_string = err.toString ? err.toString() : err
-            console.error('handleAppWidget:', err_string)
-            res.status(500).send(err_string)
+            const err_string = err.toString ? err.toString() : err;
+            console.error('handleAppWidget:', err_string);
+            res.status(500).send(err_string);
         });
 }
 
@@ -114,7 +115,7 @@ async function handleAppWidget(req, res)  {
  * If an event is triggered, the matched event function provided by the app is triggered.
  * The event can be a listener or a widget update.
  */
- async function handleAppAction(req, res) {
+async function handleAppListener(req, res) {
 
     let newData = {};
 
@@ -132,10 +133,11 @@ async function handleAppWidget(req, res)  {
             .then(data => {
                 let listenersStopTime = process.hrtime.bigint();
                 newData = data;
+
                 res.status(200).json({ data: newData, stats: { listeners: Number(listenersStopTime - listenersStartTime) } });
             })
             .catch(err => {
-                const err_string = err.toString ? err.toString() : err
+                const err_string = err.toString ? err.toString() : err;
                 console.error('handleAppAction:', err_string);
                 res.status(500).send(err_string);
             });
