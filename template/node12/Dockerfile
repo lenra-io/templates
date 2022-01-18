@@ -34,15 +34,15 @@ COPY index.js ./
 
 WORKDIR /home/app/application
 
-COPY function/*.json ./
+# COPY function/*.json ./
 
-RUN npm i
+# RUN npm i
 
 # COPY function files and folders
-COPY function/ ./
+# COPY function/ ./
 
 # Run any tests that may be available
-RUN npm test
+# RUN npm test
 
 # Set correct permissions to use non root user
 WORKDIR /home/app/server
