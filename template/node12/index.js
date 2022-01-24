@@ -147,7 +147,7 @@ async function handleAppListener(req, res) {
 }
 
 //middleware to catch ressource
-app.post('/', middleware);
+app.post('/*', middleware);
 
 const port = process.env.http_port || 3000;
 
