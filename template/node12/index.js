@@ -10,7 +10,7 @@ const app = express()
 
 let listenerHandlers = null;
 let widgetHandlers = null;
-const manifestHandler = require('../application/index');
+const manifestHandler = require('./function/index');
 
 const defaultMaxSize = '100kb' // body-parser default
 
@@ -51,7 +51,7 @@ const middleware = async (req, res) => {
 };
 
 function handleAppResource(req, res) {
-    const resources_path = "../application/resources/";
+    const resources_path = "./function/resources/";
 
     // Checking file extensions according to which ones Flutter can handle
     if (req.body.resource.match(/.*(\.jpeg|\.jpg|\.png|\.gif|\.webp|\.bmp|\.wbmp)$/)) {
