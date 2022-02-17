@@ -92,19 +92,25 @@ async function handleAppWidget(req, res) {
 
     let uiStartTime = process.hrtime.bigint();
 
-    let possibleFutureRes = widgetHandlers[widget](data, props);
+    if (Object.keys(widgetHandlers).includes(widget)) {
+        let possibleFutureRes = widgetHandlers[widget](data, props)
 
-    return Promise.resolve(possibleFutureRes)
-        .then(widget => {
-            let uiStopTime = process.hrtime.bigint();
+        return Promise.resolve(possibleFutureRes)
+            .then(widget => {
+                let uiStopTime = process.hrtime.bigint();
 
-            res.status(200).json({ widget: widget, stats: { ui: Number(uiStopTime - uiStartTime) } });
-        })
-        .catch(err => {
-            const err_string = err.toString ? err.toString() : err;
-            console.error('handleAppWidget:', err_string);
-            res.status(500).send(err_string);
-        });
+                res.status(200).json({ widget: widget, stats: { ui: Number(uiStopTime - uiStartTime) } });
+            })
+            .catch(err => {
+                const err_string = err.toString ? err.toString() : err;
+                console.error('handleAppWidget:', err_string);
+                res.status(500).send(err_string);
+            });
+    } else {
+        console.error(`No widget found for name ${widget} in app manifest.`);
+        res.status(404).send(`No widget found for name ${widget} in app manifest.`);
+    }
+
 }
 
 /**
