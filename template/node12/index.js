@@ -107,8 +107,9 @@ async function handleAppWidget(req, res) {
                 res.status(500).send(err_string);
             });
     } else {
-        console.error(`No widget found for name ${widget} in app manifest.`);
-        res.status(404).send(`No widget found for name ${widget} in app manifest.`);
+        let msg = `No widget found for name ${widget} in app manifest.`;
+        console.error(msg);
+        res.status(404).send(msg);
     }
 
 }
