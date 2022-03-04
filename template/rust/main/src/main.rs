@@ -2,6 +2,7 @@ use futures::stream::Stream;
 use hyper::rt::Future;
 use hyper::service::service_fn;
 use hyper::{Body, Request, Response, Server, StatusCode};
+use std:: env;
 
 use handler;
 
@@ -32,7 +33,8 @@ fn handler_service(req: Request<Body>) -> BoxFuture {
 }
 
 fn main() {
-    let addr = ([0, 0, 0, 0], 3000).into();
+    let port = env::var("http_port").unwrap_or(3000.to_string());
+    let addr = ([0, 0, 0, 0], port.parse().unwrap()).into();
 
     let server = Server::bind(&addr)
         .serve(|| service_fn(handler_service))
