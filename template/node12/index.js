@@ -8,9 +8,11 @@ const fs = require('fs');
 const express = require('express')
 const app = express()
 
+const manifestHandler = require('./function/index');
+
 let listenerHandlers = null;
 let widgetHandlers = null;
-const manifestHandler = require('./function/index');
+let manifest = null;
 
 const defaultMaxSize = '100kb' // body-parser default
 
@@ -61,20 +63,26 @@ function handleAppResource(req, res) {
     }
 }
 
+async function initManifest() {
+    if (manifest == null) {
+        let possibleFutureRes = manifestHandler();
+        return Promise.resolve(possibleFutureRes).then(tempManifest => {
+            widgetHandlers = tempManifest.widgets;
+            listenerHandlers = tempManifest.listeners || {};
+            manifest.widgets = Object.keys(widgetHandlers);
+            manifest.listeners = Object.keys(listenerHandlers);
+        });
+    } else {
+        return Promise.resolve(manifest);
+    }
+}
+
 async function handleAppManifest(req, res) {
 
     let uiStartTime = process.hrtime.bigint();
 
-    let possibleFutureRes = manifestHandler();
-
-    return Promise.resolve(possibleFutureRes)
-        .then(manifest => {
+    return initManifest().then(manifest => {
             let uiStopTime = process.hrtime.bigint();
-
-            widgetHandlers = manifest.widgets;
-            listenerHandlers = manifest.listeners || {};
-            manifest.widgets = Object.keys(widgetHandlers);
-            manifest.listeners = Object.keys(listenerHandlers);
 
             res.status(200).json({ manifest: manifest, stats: { ui: Number(uiStopTime - uiStartTime) } });
         })
@@ -86,7 +94,6 @@ async function handleAppManifest(req, res) {
 }
 
 async function handleAppWidget(req, res) {
-
 
     let { widget, data, props } = req.body;
 
