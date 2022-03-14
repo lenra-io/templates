@@ -72,7 +72,7 @@ async function initManifest() {
         listenerHandlers = tempManifest.listeners || {};
         manifest.widgets = Object.keys(widgetHandlers);
         manifest.listeners = Object.keys(listenerHandlers);
-
+        manifest.rootWidget = tempManifest.rootWidget;
     }
     return Promise.resolve(manifest);
 }
