@@ -66,16 +66,15 @@ function handleAppResource(req, res) {
 async function initManifest() {
     if (manifest == null) {
         let possibleFutureRes = manifestHandler();
-        return Promise.resolve(possibleFutureRes).then(tempManifest => {
-            manifest = {};
-            widgetHandlers = tempManifest.widgets;
-            listenerHandlers = tempManifest.listeners || {};
-            manifest.widgets = Object.keys(widgetHandlers);
-            manifest.listeners = Object.keys(listenerHandlers);
-        });
-    } else {
-        return Promise.resolve(manifest);
+        let tempManifest = await possibleFutureRes;
+        manifest = {};
+        widgetHandlers = tempManifest.widgets;
+        listenerHandlers = tempManifest.listeners || {};
+        manifest.widgets = Object.keys(widgetHandlers);
+        manifest.listeners = Object.keys(listenerHandlers);
+
     }
+    return Promise.resolve(manifest);
 }
 
 async function handleAppManifest(req, res) {
@@ -83,10 +82,10 @@ async function handleAppManifest(req, res) {
     let uiStartTime = process.hrtime.bigint();
 
     return initManifest().then(manifest => {
-            let uiStopTime = process.hrtime.bigint();
+        let uiStopTime = process.hrtime.bigint();
 
-            res.status(200).json({ manifest: manifest, stats: { ui: Number(uiStopTime - uiStartTime) } });
-        })
+        res.status(200).json({ manifest: manifest, stats: { ui: Number(uiStopTime - uiStartTime) } });
+    })
         .catch(err => {
             const err_string = err.toString ? err.toString() : err;
             console.error("handleAppManifest:", err_string);
