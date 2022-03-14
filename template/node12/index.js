@@ -65,14 +65,16 @@ function handleAppResource(req, res) {
 
 async function initManifest() {
     if (manifest == null) {
-        let possibleFutureRes = manifestHandler();
-        let tempManifest = await possibleFutureRes;
-        manifest = {};
+        let tempManifest = await manifestHandler();
         widgetHandlers = tempManifest.widgets;
         listenerHandlers = tempManifest.listeners || {};
-        manifest.widgets = Object.keys(widgetHandlers);
-        manifest.listeners = Object.keys(listenerHandlers);
-        manifest.rootWidget = tempManifest.rootWidget;
+        widgetHandlers = tempManifest.widgets;
+        listenerHandlers = tempManifest.listeners || {};
+        manifest = {
+            widgets: Object.keys(widgetHandlers),
+            listeners: Object.keys(listenerHandlers),
+            rootWidget: tempManifest.rootWidget
+        };
     }
     return Promise.resolve(manifest);
 }
