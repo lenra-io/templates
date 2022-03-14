@@ -67,6 +67,7 @@ async function initManifest() {
     if (manifest == null) {
         let possibleFutureRes = manifestHandler();
         return Promise.resolve(possibleFutureRes).then(tempManifest => {
+            manifest = {};
             widgetHandlers = tempManifest.widgets;
             listenerHandlers = tempManifest.listeners || {};
             manifest.widgets = Object.keys(widgetHandlers);
