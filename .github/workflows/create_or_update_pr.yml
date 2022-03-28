@@ -1,0 +1,43 @@
+name: Create or Update PR
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Lenra Component Version'
+        required: true
+      release_notes:
+        description: 'Lenra Component Release notes'
+        required: false
+      origin:
+        description: 'Label of the dependency to change version.'
+        required: true
+
+jobs:
+  create_or_update_pr:
+    name: Create or Update PR
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Prepare version
+        id: prepare-version
+        run: |
+          VERSION="${{ github.event.inputs.version }}"
+          echo "::set-output name=version::${VERSION/v}"
+      - name: create_pr
+        uses: lenra-io/create-or-update-pr-action@v1.1.0
+        with:
+          name: 'Update dependecies'
+          token: ${{ secrets.WORKFLOW_GITHUB_TOKEN }}
+          script: |
+            echo "$(sed -E "s/(FROM lenra[/]devtools:[$][{]DEVTOOLS_IMAGE:-).*([}] as devtools)/\1${{ steps.prepare-version.outputs.version }}\2/g" Dockerfile.devtools)" > Dockerfile.devtools
+            git add Dockerfile.devtools
+            
+            RELEASE_NOTES="${{ github.event.inputs.release_notes }}"
+            RELEASE_TYPE="${RELEASE_NOTES/:*}"
+            
+            git commit -m "${RELEASE_TYPE}: Upgrade ${{ github.event.inputs.origin }} to ${{ github.event.inputs.version }}
+            ${RELEASE_NOTES}"
+            
