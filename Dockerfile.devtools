@@ -2,11 +2,16 @@ ARG TEMPLATE_IMAGE
 
 ARG DEVTOOLS_IMAGE
 
-FROM lenra/devtools:${DEVTOOLS_IMAGE:-1.0.0-beta.29} as devtools
+FROM ${DEVTOOLS_IMAGE} as devtools
 
 FROM ${TEMPLATE_IMAGE}
 
-ENV fprocess=$fprocess_debug
+ENV OF_WATCHDOG_BIN="fwatchdog"
+ENV OF_WATCHDOG_F_PROCESS=$fprocess
+ENV OF_WATCHDOG_UPSTREAM_URL=$upstream_url
+ENV OF_WATCHDOG_MODE=$mode
+ENV OF_WATCHDOG_PORT=3333
+ENV SHELL="/bin/sh"
 
 COPY --from=devtools /lenra/devtools /lenra/devtools
 
@@ -17,5 +22,5 @@ RUN apk add --no-cache ncurses-libs libstdc++
 USER app
 
 VOLUME [ "/home/app/application" ]
-ENTRYPOINT [ "/lenra/devtools/entrypoint.sh" ]
-CMD ["fwatchdog"]
+ENTRYPOINT [ "/lenra/devtools/rel/dev_tools/bin/dev_tools" ]
+CMD ["start"]
