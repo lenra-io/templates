@@ -1,0 +1,11 @@
+[package]
+name = "main"
+version = "0.1.0"
+authors = ["Piotr Roslaniec <p.roslaniec@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+json = "0.12"
+handler = { path = "../function" }
+hyper = "0.13"
+tokio = { version = "0.2", features = ["full"] }
