@@ -8,7 +8,6 @@ const fs = require('fs');
 const express = require('express')
 const app = express()
 
-
 const manifestHandler = require('./function/index');
 
 let listenerHandlers = null;
