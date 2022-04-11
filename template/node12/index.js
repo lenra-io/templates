@@ -8,15 +8,6 @@ const fs = require('fs');
 const express = require('express')
 const app = express()
 
-const apiOptions = {
-    hostname: 'api.lenra.io',
-    port: 443,
-    path: '',
-    method: '',
-    headers: {
-        'authorization': ''
-    }
-}
 
 const manifestHandler = require('./function/index');
 
@@ -145,17 +136,15 @@ async function handleAppListener(req, res) {
 
     let newData = {};
 
-    let { action, data, props, event } = req.body;
+    let { action, props, event, apiOptions } = req.body;
 
     let listenersStartTime = process.hrtime.bigint();
-
-    apiOptions.headers.authorization = req.headers.authorization
 
     /*
         listeners file need to exactly math with action name
     */
     if (Object.keys(listenerHandlers).includes(action)) {
-        let possibleFutureRes = listenerHandlers[action](data, props, event, apiOptions);
+        let possibleFutureRes = listenerHandlers[action](props, event, apiOptions);
 
         return Promise.resolve(possibleFutureRes)
             .then(data => {
