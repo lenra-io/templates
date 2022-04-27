@@ -2,11 +2,13 @@ ARG TEMPLATE_IMAGE
 
 ARG DEVTOOLS_IMAGE
 
-FROM lenra/devtools:${DEVTOOLS_IMAGE:-1.0.0-beta.33} as devtools
+FROM devtools-data as devtools
 
-FROM ${TEMPLATE_IMAGE}
+FROM template-node12-data
 
 ENV fprocess=$fprocess_debug
+
+ENV OF_WATCHDOG_BIN=fwatchdog
 
 COPY --from=devtools /lenra/devtools /lenra/devtools
 
@@ -19,9 +21,11 @@ ENV PG_VERSION=${PG_VERSION:-13}
 # Choose the place where to store data
 ENV PGDATA=/var/lib/postgresql/data
 # Configure postgres user informations
-ENV POSTGRES_DB=lenra_dev
+ENV POSTGRES_DB=lenra_devtool
 ENV POSTGRES_USER=postgres
 ENV POSTGRES_PASSWORD=postgres
+ENV POSTGRES_HOST=localhost
+ENV SHELL=/bin/sh
 #
 # Add the postgres user to the docker image
 RUN set -eux; \
@@ -46,4 +50,4 @@ USER app
 
 VOLUME [ "/home/app/application" ]
 ENTRYPOINT [ "/bin/sh" ]
-CMD ["-c", "/lenra/devtools/pg_entrypoint.sh; /lenra/devtools/entrypoint.sh fwatchdog"]
+CMD ["-c", "/lenra/devtools/pg_entrypoint.sh; /lenra/devtools/rel/dev_tools/bin/dev_tools start"]

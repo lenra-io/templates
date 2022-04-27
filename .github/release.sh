@@ -56,7 +56,7 @@ fi
 
 docker buildx build \
   --output type=image,push=true \
-  --platform "linux/amd64,linux/arm64,linux/arm" \
+  --platform "linux/amd64,linux/arm64" \
   ${tag} \
   --build-arg CI=true \
   template/node12
@@ -69,7 +69,7 @@ fi
 
 docker buildx build \
   --output type=image,push=true \
-  --platform "amd64,arm64,arm" \
+  --platform "linux/amd64,linux/arm64" \
   ${tag} \
   --build-arg CI=true \
   --build-arg TEMPLATE_IMAGE=lenra/template-node12:${version} \
