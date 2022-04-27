@@ -2,9 +2,9 @@ ARG TEMPLATE_IMAGE
 
 ARG DEVTOOLS_IMAGE
 
-FROM devtools-data as devtools
+FROM lenra/devtools:${DEVTOOLS_IMAGE:-1.0.0-data.9} as devtools
 
-FROM template-node12-data
+FROM ${TEMPLATE_IMAGE}
 
 ENV fprocess=$fprocess_debug
 
