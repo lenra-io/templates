@@ -24,6 +24,7 @@ WORKDIR /home/app
 COPY package.json ./
 
 # This ordering means the npm installation is cached for the outer function handler.
+RUN sudo chown -R $(id -u) /home/app
 RUN npm i
 
 # Copy outer function handler
