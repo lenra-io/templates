@@ -6,8 +6,6 @@ FROM lenra/devtools:${DEVTOOLS_IMAGE:-1.0.0-beta.34} as devtools
 
 FROM ${TEMPLATE_IMAGE}
 
-ENV fprocess=$fprocess_debug
-
 COPY --from=devtools /lenra/devtools /lenra/devtools
 
 USER root
@@ -22,6 +20,9 @@ ENV PGDATA=/var/lib/postgresql/data
 ENV POSTGRES_DB=lenra_dev
 ENV POSTGRES_USER=postgres
 ENV POSTGRES_PASSWORD=postgres
+
+ENV OF_WATCHDOG_BIN=/usr/bin/fwatchdog
+ENV SHELL=/bin/sh
 #
 # Add the postgres user to the docker image
 RUN set -eux; \
@@ -46,4 +47,4 @@ USER app
 
 VOLUME [ "/home/app/application" ]
 ENTRYPOINT [ "/bin/sh" ]
-CMD ["-c", "/lenra/devtools/pg_entrypoint.sh; /lenra/devtools/entrypoint.sh fwatchdog"]
+CMD ["-c", "/lenra/devtools/pg_entrypoint.sh; /lenra/devtools/rel/dev_tools/bin/dev_tools start"]
