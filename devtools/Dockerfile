@@ -20,29 +20,29 @@ ENV POSTGRES_PASSWORD=lenra
 
 ENV OF_WATCHDOG_BIN=/usr/bin/fwatchdog
 ENV SHELL=/bin/sh
+
+# Install elixir dependencies
+RUN apk add --no-cache ncurses-libs libstdc++
+
+# make the "en_US.UTF-8" locale so postgres will be utf-8 enabled by default
+#
+ENV LANG en_US.utf8
 #
 # Add the postgres user to the docker image
 RUN set -eux; \
 	mkdir -p /var/lib/postgresql /run/postgresql; \
 	chown -R app:nogroup /var/lib/postgresql /run/postgresql; \
-	chmod -R 0700 /var/lib/postgresql /run/postgresql
-#
-# make the "en_US.UTF-8" locale so postgres will be utf-8 enabled by default
-ENV LANG en_US.utf8
-#
-# Install PostgeSQL using provided version
-RUN set -eux; \
-  apk add --no-cache postgresql
+	chmod -R 0700 /var/lib/postgresql /run/postgresql; \
+	# Install PostgeSQL using provided version \
+	apk add --no-cache postgresql;
 
-# Install elixir dependencies
-RUN apk add --no-cache ncurses-libs libstdc++
+COPY pg_entrypoint.sh pg_init.sh /lenra/devtools/
 
-COPY pg_entrypoint.sh /lenra/devtools/
-RUN chmod +x /lenra/devtools/pg_entrypoint.sh
+RUN chmod +x /lenra/devtools/pg_entrypoint.sh /lenra/devtools/pg_init.sh
 
 USER app
 
-RUN env "INIT_ONLY=1" /lenra/devtools/pg_entrypoint.sh
+RUN /lenra/devtools/pg_init.sh --init-only
 
 VOLUME [ "/home/app/application" ]
 ENTRYPOINT [ "/bin/sh" ]
