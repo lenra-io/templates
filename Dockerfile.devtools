@@ -11,15 +11,12 @@ COPY --from=devtools /lenra/devtools /lenra/devtools
 USER root
 
 ## Postgres installation
-# Choose the postgres version at build time
-ARG PG_VERSION
-ENV PG_VERSION=${PG_VERSION:-13}
 # Choose the place where to store data
 ENV PGDATA=/var/lib/postgresql/data
 # Configure postgres user informations
 ENV POSTGRES_DB=lenra_dev
-ENV POSTGRES_USER=postgres
-ENV POSTGRES_PASSWORD=postgres
+ENV POSTGRES_USER=lenra
+ENV POSTGRES_PASSWORD=lenra
 
 ENV OF_WATCHDOG_BIN=/usr/bin/fwatchdog
 ENV SHELL=/bin/sh
@@ -35,7 +32,7 @@ ENV LANG en_US.utf8
 #
 # Install PostgeSQL using provided version
 RUN set -eux; \
-	apk add --no-cache postgresql${PG_VERSION}
+  apk add --no-cache postgresql
 
 # Install elixir dependencies
 RUN apk add --no-cache ncurses-libs libstdc++
@@ -44,6 +41,8 @@ COPY pg_entrypoint.sh /lenra/devtools/
 RUN chmod +x /lenra/devtools/pg_entrypoint.sh
 
 USER app
+
+RUN env "INIT_ONLY=1" /lenra/devtools/pg_entrypoint.sh
 
 VOLUME [ "/home/app/application" ]
 ENTRYPOINT [ "/bin/sh" ]
