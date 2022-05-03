@@ -2,7 +2,7 @@ ARG TEMPLATE_IMAGE
 
 ARG DEVTOOLS_IMAGE
 
-FROM lenra/devtools:${DEVTOOLS_IMAGE:-1.0.0-beta.34} as devtools
+FROM lenra/devtools:${DEVTOOLS_IMAGE:-1.0.0-beta.35} as devtools
 
 FROM ${TEMPLATE_IMAGE}
 
