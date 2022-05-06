@@ -81,10 +81,12 @@ async function initManifest() {
 
 async function handleAppManifest(req, res) {
 
+    let uiStartTime = process.hrtime.bigint();
 
     return initManifest().then(manifest => {
+        let uiStopTime = process.hrtime.bigint();
 
-        res.status(200).json({ manifest: manifest });
+        res.status(200).json({ manifest: manifest, stats: { ui: Number(uiStopTime - uiStartTime) } });
     })
         .catch(err => {
             const err_string = err.toString ? err.toString() : err;
@@ -94,15 +96,19 @@ async function handleAppManifest(req, res) {
 }
 
 async function handleAppWidget(req, res) {
+
     let { widget, data, props } = req.body;
+
+    let uiStartTime = process.hrtime.bigint();
 
     if (Object.keys(widgetHandlers).includes(widget)) {
         let possibleFutureRes = widgetHandlers[widget](data, props)
 
         return Promise.resolve(possibleFutureRes)
             .then(widget => {
+                let uiStopTime = process.hrtime.bigint();
 
-                res.status(200).json({ widget: widget });
+                res.status(200).json({ widget: widget, stats: { ui: Number(uiStopTime - uiStartTime) } });
             })
             .catch(err => {
                 const err_string = err.toString ? err.toString() : err;
@@ -126,16 +132,25 @@ async function handleAppWidget(req, res) {
  * The event can be a listener or a widget update.
  */
 async function handleAppListener(req, res) {
-    let { action, props, event, api } = req.body;
+
+    let newData = {};
+
+    let { action, data, props, event } = req.body;
+
+    let listenersStartTime = process.hrtime.bigint();
+
     /*
         listeners file need to exactly math with action name
     */
     if (Object.keys(listenerHandlers).includes(action)) {
-        let possibleFutureRes = listenerHandlers[action](props, event, api);
+        let possibleFutureRes = listenerHandlers[action](data, props, event);
 
         return Promise.resolve(possibleFutureRes)
-            .then(() => {
-                res.status(200).send();
+            .then(data => {
+                let listenersStopTime = process.hrtime.bigint();
+                newData = data;
+
+                res.status(200).json({ data: newData, stats: { listeners: Number(listenersStopTime - listenersStartTime) } });
             })
             .catch(err => {
                 const err_string = err.toString ? err.toString() : err;
