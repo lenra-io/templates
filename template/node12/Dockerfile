@@ -21,6 +21,7 @@ RUN mkdir -p /home/app
 
 # Wrapper/boot-strapper
 WORKDIR /home/app
+
 COPY package.json ./
 
 # This ordering means the npm installation is cached for the outer function handler.
@@ -33,6 +34,12 @@ COPY index.js ./
 # entry allows caching of npm install
 
 WORKDIR /home/app/function
+
+USER root
+
+RUN chown -R app /home/app/function
+
+USER app
 
 COPY function/*.json ./
 

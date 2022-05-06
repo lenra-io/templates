@@ -2,7 +2,7 @@ ARG TEMPLATE_IMAGE
 
 ARG DEVTOOLS_IMAGE
 
-FROM lenra/devtools:${DEVTOOLS_IMAGE:-1.0.0-beta.36} as devtools
+FROM lenra/devtools:${DEVTOOLS_IMAGE:-1.0.0-data.3} as devtools
 
 FROM ${TEMPLATE_IMAGE}
 
@@ -14,11 +14,12 @@ USER root
 # Choose the place where to store data
 ENV PGDATA=/var/lib/postgresql/data
 # Configure postgres user informations
-ENV POSTGRES_DB=lenra_dev
-ENV POSTGRES_USER=lenra
-ENV POSTGRES_PASSWORD=lenra
+ENV POSTGRES_DB=lenra_devtool
+ENV POSTGRES_USER=postgres
+ENV POSTGRES_PASSWORD=postgres
 
 ENV OF_WATCHDOG_BIN=/usr/bin/fwatchdog
+ENV POSTGRES_HOST=localhost
 ENV SHELL=/bin/sh
 
 # Install elixir dependencies
