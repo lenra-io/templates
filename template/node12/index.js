@@ -4,23 +4,36 @@
 
 "use strict"
 
-const fs = require('fs');
-const express = require('express')
-const app = express()
+const express = require('express');
+const morgan = require('morgan');
+const app = express();
 
 const manifestHandler = require('./function/index');
+const defaultMaxSize = '100kb'; // body-parser default
+
+const rawLimit = process.env.MAX_RAW_SIZE || defaultMaxSize;
+const jsonLimit = process.env.MAX_JSON_SIZE || defaultMaxSize;
 
 let listenerHandlers = null;
 let widgetHandlers = null;
 let manifest = null;
 
-const defaultMaxSize = '100kb' // body-parser default
+const RESOURCE_TYPE = "resource";
+const LISTENER_TYPE = "listener";
+const WIDGET_TYPE = "widget";
+const MANIFEST_TYPE = "manifest";
 
 app.disable('x-powered-by');
 
-const rawLimit = process.env.MAX_RAW_SIZE || defaultMaxSize
-const jsonLimit = process.env.MAX_JSON_SIZE || defaultMaxSize
-
+app.use(morgan(function (tokens, req, res) {
+    return [
+        tokens.method(req, res),
+        tokens.url(req, res),
+        'type:', get_req_type(req),
+        tokens.status(req, res),
+        tokens['response-time'](req, res), 'ms'
+    ].join(' ')
+}))
 app.use(function addDefaultContentType(req, res, next) {
     // When no content-type is given, the body element is set to
     // nil, and has been a source of contention for new users.
@@ -39,16 +52,40 @@ if (process.env.RAW_BODY === 'true') {
     app.use(express.urlencoded({ extended: true }));
 }
 
-const middleware = async (req, res) => {
-    // Checking whether middleware received a Resource or Action request
+const get_req_type = (req) => {
+    if (req.method !== "POST") return "none";
     if (req.body.resource) {
-        handleAppResource(req, res);
+        return RESOURCE_TYPE;
     } else if (req.body.action) {
-        handleAppListener(req, res);
+        return LISTENER_TYPE;
     } else if (req.body.widget) {
-        handleAppWidget(req, res);
+        return WIDGET_TYPE;
     } else {
-        handleAppManifest(req, res);
+        return MANIFEST_TYPE;
+    }
+}
+
+const middleware = async (req, res) => {
+    switch (get_req_type(req)) {
+        case RESOURCE_TYPE:
+            handleAppResource(req, res);
+            break;
+
+        case LISTENER_TYPE:
+            handleAppListener(req, res);
+            break;
+
+        case WIDGET_TYPE:
+            handleAppWidget(req, res);
+            break;
+
+        case MANIFEST_TYPE:
+            handleAppManifest(req, res);
+            break;
+
+        default:
+            throw "Middleware type unknown.";
+
     }
 };
 
