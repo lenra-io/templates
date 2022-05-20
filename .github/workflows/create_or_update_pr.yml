@@ -32,8 +32,8 @@ jobs:
           name: 'Update dependencies'
           token: ${{ secrets.WORKFLOW_GITHUB_TOKEN }}
           script: |
-            echo "$(sed -E "s/(FROM lenra[/]devtools:[$][{]DEVTOOLS_IMAGE:-).*([}] as devtools)/\1${{ steps.prepare-version.outputs.version }}\2/g" Dockerfile.devtools)" > Dockerfile.devtools
-            git add Dockerfile.devtools
+            echo "$(sed -E "s/(FROM lenra[/]devtools:[$][{]DEVTOOLS_IMAGE:-).*([}] as devtools)/\1${{ steps.prepare-version.outputs.version }}\2/g" devtools/Dockerfile)" > devtools/Dockerfile
+            git add devtools/Dockerfile
             
             RELEASE_NOTES="${{ github.event.inputs.release_notes }}"
             RELEASE_TYPE="${RELEASE_NOTES/:*}"
