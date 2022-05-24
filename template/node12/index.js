@@ -131,10 +131,10 @@ async function handleAppManifest(req, res) {
 }
 
 async function handleAppWidget(req, res) {
-    let { widget, data, props } = req.body;
+    let { widget, data, props, context } = req.body;
 
     if (Object.keys(widgetHandlers).includes(widget)) {
-        let possibleFutureRes = widgetHandlers[widget](data, props)
+        let possibleFutureRes = widgetHandlers[widget](data, props, context)
 
         return Promise.resolve(possibleFutureRes)
             .then(widget => {
