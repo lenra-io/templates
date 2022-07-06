@@ -32,7 +32,7 @@ app.use(morgan(function (tokens, req, res) {
         tokens.method(req, res),
         tokens.url(req, res),
         'type:', get_req_type(req),
-        'info:',  req.body[req_type_body_key[get_req_type(req)]?.toString()] || '',
+        'info:',  req.body[req_type_body_key[get_req_type(req)]] || '',
         tokens.status(req, res),
         tokens['response-time'](req, res), 'ms'
     ].join(' ')
