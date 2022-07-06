@@ -23,8 +23,6 @@ const LISTENER_TYPE = "listener";
 const WIDGET_TYPE = "widget";
 const MANIFEST_TYPE = "manifest";
 
-const req_type_body_key = { [RESOURCE_TYPE]: "resource" ,[LISTENER_TYPE]: "action", [WIDGET_TYPE]: "widget" }
-
 app.disable('x-powered-by');
 
 app.use(morgan(function (tokens, req, res) {
@@ -32,7 +30,6 @@ app.use(morgan(function (tokens, req, res) {
         tokens.method(req, res),
         tokens.url(req, res),
         'type:', get_req_type(req),
-        'info:',  req.body[req_type_body_key[get_req_type(req)]?.toString()] || '',
         tokens.status(req, res),
         tokens['response-time'](req, res), 'ms'
     ].join(' ')
@@ -57,11 +54,11 @@ if (process.env.RAW_BODY === 'true') {
 
 const get_req_type = (req) => {
     if (req.method !== "POST") return "none";
-    if (req.body[req_type_body_key[RESOURCE_TYPE]]) {
+    if (req.body.resource) {
         return RESOURCE_TYPE;
-    } else if (req.body[req_type_body_key[LISTENER_TYPE]]) {
+    } else if (req.body.action) {
         return LISTENER_TYPE;
-    } else if (req.body[req_type_body_key[WIDGET_TYPE]]) {
+    } else if (req.body.widget) {
         return WIDGET_TYPE;
     } else {
         return MANIFEST_TYPE;
